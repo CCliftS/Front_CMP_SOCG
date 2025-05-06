@@ -124,6 +124,5 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, in
         dropdownItems,
         handleInputChange,
         handleSave,
-        handleValleySelect,
     };
 };

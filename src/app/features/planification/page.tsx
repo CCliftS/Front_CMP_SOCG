@@ -9,13 +9,11 @@ import ValleyTaskForm from "./components/ValleyTaskForm";
 import { Button } from "@/components/ui/button";
 import { usePlanification } from "./hooks/usePlanification";
 import { useHooks } from "../hooks/useHooks";
-import Dropdown from "@/components/Dropdown";
 
 
 export default function Planification() {
     const {
         handleCancel,
-        setSelectedForm,
         setIsPopupOpen,
         handleAddTask,
         handleSaveTask,
@@ -24,7 +22,6 @@ export default function Planification() {
         isPopupOpen,
         loading,
         subTasks,
-        selectedForm,
         selectedTaskId,
         isSidebarOpen,
         tableOption,
@@ -64,7 +61,7 @@ export default function Planification() {
                             <div className="flex flex-col gap-4">
                                 <h1 className="text-2xl font-bold">Planificación</h1>
                                 <div className="">
-                                    <div className="mx-4 flex-1">
+                                    <div className="ml-4 flex-1">
                                         <div className="flex flex-row justify-between items-center mb-4">
                                             <Button
                                                 onClick={handleAddTask}
@@ -83,7 +80,6 @@ export default function Planification() {
                                                 subtasks={subTasks}
                                                 selectedTaskId={selectedTaskId}
                                                 onTaskClick={handleOnTaskClick}
-                                                tableOption={tableOption}
                                                 data-test-id="tasks-table"
                                             />
                                         </div>
@@ -92,42 +88,13 @@ export default function Planification() {
                             </div>
                         </main>
                     </div>
-                    <Modal
-                        isOpen={isPopupOpen}
-                        onClose={() => {
-                            setIsPopupOpen(false);
-                            setSelectedForm(null); 
-                        }}
-                        data-test-id="task-form-modal"
-                    >
-                        {selectedForm ? (
-                            <ValleyTaskForm
-                                onSave={handleSaveTask}
-                                onCancel={() => {
-                                    handleCancel();
-                                    setSelectedForm(null); 
-                                }}
-                                isEditing={false}
-                                details={false}
-                                valley={"Valle de Copiapó"}
-                                data-test-id="edit-task-form"
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center h-full">
-                                <p className="mb-4 text-center">Por favor, selecciona un formulario para continuar.</p>
-                                <div>
-                                    <Dropdown
-                                        buttonText="Seleccionar formulario"
-                                        items={["Tarea", "Subtarea"]}
-                                        onSelect={(item) => {
-                                            setSelectedForm(item === "Tarea" ? "Tarea" : "Subtarea");
-                                        }}
-                                        data-test-id="form-selector-dropdown"
-                                        isInModal={true}
-                                    />
-                                </div>
-                            </div>
-                        )}
+                    <Modal isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
+                        <ValleyTaskForm
+                            onCancel={handleCancel}
+                            onSave={handleSaveTask}
+                            valley="Valle de Copiapó"
+                            data-test-id="task-form"
+                        />
                     </Modal>
                 </>
             )}

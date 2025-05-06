@@ -143,3 +143,24 @@ export const REMOVE_INFO_TASK = gql`
     }
   }
 `;
+
+// Query para obtener la infoTask por su taskId
+export const GET_TASK_INFO = gql`
+  query taskInfo($id: ID!) {
+    taskInfo(id: $id) {
+      id
+      interactionId
+      investmentId
+      originId
+      riskId
+      scopeId
+      taskId
+      typeId
+      task {
+        id
+        name
+        description
+      }
+    }
+  }
+`;

@@ -8,12 +8,25 @@ interface DropdownMenuProps {
   items: string[]; 
   onSelect: (item: string) => void; 
   isInModal?: boolean; 
+  selectedValue?: string;
 }
 
-export default function DropdownMenu({ buttonText, items, onSelect, isInModal = false }: DropdownMenuProps) {
+export default function DropdownMenu({ 
+  buttonText, 
+  items, 
+  onSelect, 
+  isInModal = false, 
+  selectedValue 
+}: DropdownMenuProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null); 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedValue) {
+      setSelectedItem(selectedValue);
+    }
+  }, [selectedValue]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -49,7 +62,7 @@ export default function DropdownMenu({ buttonText, items, onSelect, isInModal = 
           onClick={toggleDropdown}
           className="cursor-pointer"
         >
-          {selectedItem || buttonText}
+          {selectedItem || buttonText} 
           <span className="ml-auto mt-1">
             <ChevronDown
               size={16}

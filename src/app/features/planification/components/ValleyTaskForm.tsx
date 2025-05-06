@@ -2,16 +2,19 @@
 import { useValleyTaskForm } from "@/app/features/planification/hooks/useValleyTaskForm";
 import DropdownMenu from "@/components/Dropdown";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { usePlanification } from "../hooks/usePlanification";
 
 interface ValleyTaskFormProps {
-  onSave: any; //TODO: Define the type for the task object
+  onSave: any; // TODO: Define the type for the task object
   onCancel: () => void;
   details?: boolean;
   isEditing?: boolean;
   valley: string;
+  infoTask?: any;
 }
 
-export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, details }: ValleyTaskFormProps) {
+export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, details, infoTask }: ValleyTaskFormProps) {
   const {
     formState,
     faenas,
@@ -19,6 +22,27 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
     handleInputChange,
     handleSave,
   } = useValleyTaskForm(onSave, valley);
+
+  const {handleGetTaskBudget, handleGetTaskExpenses, handleGetTaskFaena} = usePlanification();
+
+  useEffect(() => {
+    const fetchTaskDetails = async () => {
+      if (infoTask) {
+          handleInputChange("name", infoTask.task.name);
+          handleInputChange("description", infoTask.task.description);
+          handleInputChange("origin", infoTask.originId);
+          handleInputChange("investment", infoTask.investmentId);
+          handleInputChange("type", infoTask.typeId);
+          handleInputChange("scope", infoTask.scopeId);
+          handleInputChange("interaction", infoTask.interactionId);
+          handleInputChange("risk", infoTask.riskId);
+          handleInputChange("budget", await handleGetTaskBudget(infoTask.taskId));
+          handleInputChange("expenses", await handleGetTaskExpenses(infoTask.taskId));
+          handleInputChange("faena", await handleGetTaskFaena(infoTask.taskId));
+      }
+    };
+    fetchTaskDetails();
+  }, [infoTask]);
 
   return (
     <div data-test-id="task-form">
@@ -48,6 +72,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={dropdownItems.origin}
           onSelect={(value) => handleInputChange("origin", value)}
           buttonText="Seleccione Origen"
+          selectedValue={dropdownItems.origin[infoTask?.originId - 1]}
           isInModal={true}
         />
       </div>
@@ -58,6 +83,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={dropdownItems.investment}
           onSelect={(value) => handleInputChange("investment", value)}
           isInModal={true}
+          selectedValue={dropdownItems.investment[infoTask?.investmentId - 1]}
           data-test-id="task-investment-dropdown"
         />
       </div>
@@ -68,6 +94,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={dropdownItems.type}
           onSelect={(value) => handleInputChange("type", value)}
           isInModal={true}
+          selectedValue={dropdownItems.type[infoTask?.typeId - 1]}
           data-test-id="task-type-dropdown"
         />
       </div>
@@ -78,6 +105,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={dropdownItems.scope}
           onSelect={(value) => handleInputChange("scope", value)}
           isInModal={true}
+          selectedValue={dropdownItems.scope[infoTask?.scopeId - 1]}
           data-test-id="task-scope-dropdown"
         />
       </div>
@@ -88,6 +116,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={dropdownItems.interaction}
           onSelect={(value) => handleInputChange("interaction", value)}
           isInModal={true}
+          selectedValue={dropdownItems.interaction[infoTask?.interactionId - 1]}
           data-test-id="task-interaction-dropdown"
         />
       </div>
@@ -99,6 +128,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
             items={dropdownItems.state}
             onSelect={(value) => handleInputChange("state", value)}
             isInModal={true}
+            selectedValue={dropdownItems.state[infoTask?.statusId - 1]}
             data-test-id="task-state-dropdown"
           />
         </div>
@@ -112,6 +142,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
               value={formState.budget}
               onChange={(e) => handleInputChange("budget", e.target.value)}
               className="w-full border rounded px-3 py-2"
+              disabled= {true}
               data-test-id="task-budget-input"
             />
           </div>
@@ -122,37 +153,8 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
               value={formState.expenses}
               onChange={(e) => handleInputChange("expenses", e.target.value)}
               className="w-full border rounded px-3 py-2"
+              disabled= {true}
               data-test-id="task-expenses-input"
-            />
-          </div>
-          <div className="mb-4 truncate">
-            <label className="block text-sm font-medium mb-1">Fecha de Inicio</label>
-            <input
-              type="date"
-              value={formState.startDate}
-              onChange={(e) => handleInputChange("startDate", e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              data-test-id="task-start-date-input"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Fecha Final</label>
-            <input
-              type="date"
-              value={formState.endDate}
-              onChange={(e) => handleInputChange("endDate", e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              data-test-id="task-end-date-input"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Fecha de Termino</label>
-            <input
-              type="date"
-              value={formState.finishDate}
-              onChange={(e) => handleInputChange("finishDate", e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              data-test-id="task-finish-date-input"
             />
           </div>
         </>
@@ -164,6 +166,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={dropdownItems.risk}
           onSelect={(value) => handleInputChange("risk", value)}
           isInModal={true}
+          selectedValue={dropdownItems.risk[infoTask?.riskId - 1]}
           data-test-id="task-risk-dropdown"
         />
       </div>
@@ -174,6 +177,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={faenas}
           onSelect={(value) => handleInputChange("faena", value)}
           isInModal={true}
+          selectedValue={faenas[Number(formState.faena) - 1]}
           data-test-id="task-faena-dropdown"
         />
       </div>
