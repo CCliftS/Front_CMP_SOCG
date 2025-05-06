@@ -1,6 +1,6 @@
 'use client';
 import React from "react";
-import { ValleysTasksTableColumns, SubtaskTableColumns } from "@/constants/tableConstants";
+import { ValleysTasksTableColumns} from "@/constants/tableConstants";
 import { ISubtask } from "@/app/models/ISubtasks";
 import { usePlanification } from "../hooks/usePlanification";
 import { taskOrigin, taskType, taskScope, taskInteraction, taskRisk } from "@/constants/infoTasks";
@@ -9,7 +9,6 @@ import { ZoomIn } from "lucide-react";
 interface TasksTableProps {
     tasks: any[];
     subtasks: ISubtask[];
-
     selectedTaskId: string | null;
     onTaskClick: (taskId: string) => void;
     tableOption: string;
@@ -24,7 +23,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
 }) => {
 
 
-    const {getRemainingDays,formatDate} = usePlanification();
+    const {getRemainingDays,formatDate,handleSeeInformation, setIsPopupOpen,setSelectedForm} = usePlanification();
 
     return (
         <div className="overflow-x-auto border border-[#041e3e] rounded-md">
@@ -45,11 +44,11 @@ const TasksTable: React.FC<TasksTableProps> = ({
                 <tbody className="bg-white text-xs truncate divide-y divide-[#041e3e]">
                     {tasks.map((task) => (
                         <React.Fragment key={task.id}>
-                            <tr
-                                onClick={() => onTaskClick(task.taskId)}
-                                className={`${selectedTaskId === task.taskId ? "bg-white" : ""} cursor-pointer`}
-                            >
-                                <td className="px-4 py-2 text-center">{task.task.name}</td>
+                            <tr className={`${selectedTaskId === task.taskId ? "bg-white" : ""}`} >
+                                <td 
+                                    className="px-4 py-2 text-center cursor-pointer text-blue-700 font-semibold"
+                                    onClick={() => onTaskClick(task.taskId)}
+                                >{task.task.name}</td>
                                 <td className="px-4 py-2 text-center">{taskOrigin[task.originId + 1]}</td>
                                 <td className="px-4 py-2 text-center">{taskType[task.typeId + 1]}</td>
                                 <td className="px-4 py-2 text-center">{taskScope[task.scopeId + 1]}</td>
@@ -61,7 +60,18 @@ const TasksTable: React.FC<TasksTableProps> = ({
                                 <td className="px-4 py-2 text-center">{getRemainingDays(task.startDate, task.endDate)}</td>
                                 <td className="px-4 py-2 text-center">{task.finishDate ? formatDate(task.finishDate) : "-"}</td>
                                 <td className="px-4 py-2 text-center">
-                                    <ZoomIn size={20} color="#041e3e" />
+                                    <ZoomIn 
+                                        size={20} 
+                                        color="#041e3e" 
+                                        className="cursor-pointer"
+                                        onClick={async () => {
+                                            const taskInfo = await handleSeeInformation(task.taskId); 
+                                            if (taskInfo) {
+                                                setSelectedForm("Tarea");
+                                                setIsPopupOpen(true); 
+                                            }
+                                        }}
+                                    />
                                 </td>
                             </tr>
                             {selectedTaskId === task.taskId &&
@@ -69,7 +79,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
                                     .map((subtask) => (
                                         <tr
                                             key={subtask.id}
-                                            className="cursor-pointer bg-gray-200"
+                                            className="bg-gray-200"
                                         >
                                             <td className="px-4 py-2 text-center">{subtask.name}</td>
                                             <td className="px-4 py-2 text-center">{"-"}</td>
@@ -83,7 +93,12 @@ const TasksTable: React.FC<TasksTableProps> = ({
                                             <td className="px-4 py-2 text-center">{getRemainingDays(subtask.startDate,subtask.endDate)}</td>
                                             <td className="px-4 py-2 text-center">{formatDate(subtask.finalDate)}</td>
                                             <td className="px-4 py-2 text-center">
-                                                <ZoomIn size={20} color="#041e3e" />
+                                                <ZoomIn 
+                                                size={20} 
+                                                color="#041e3e" 
+                                                className="cursor-pointer"
+                                                // onClick={() => onTaskClick(subtask.taskId)} MANDAR AL FORM CON EL details true
+                                                />
                                             </td>
                                         </tr>
                                     ))}

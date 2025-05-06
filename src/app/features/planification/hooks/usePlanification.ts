@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { CREATE_TASK, GET_TASK_SUBTASKS } from "@/app/api/tasks";
-import { Valleys } from "@/constants/valleys";
-import { Faenas } from "@/constants/faenas";
-import { GET_INFO_TASKS } from "@/app/api/infoTask";
+import { CREATE_TASK, GET_TASK, GET_TASK_SUBTASKS } from "@/app/api/tasks";
+import { CREATE_INFO_TASK, GET_INFO_TASK, GET_INFO_TASKS } from "@/app/api/infoTask";
 
 export const usePlanification = () => {
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
@@ -13,8 +11,10 @@ export const usePlanification = () => {
     const [selectedForm, setSelectedForm] = useState<string | null>(null);
     const [subTasks, setSubtasks] = useState<any[]>([]);
     const [createTask] = useMutation(CREATE_TASK);
+    const [createInfoTask] = useMutation(CREATE_INFO_TASK);
     const {data,loading,error} = useQuery(GET_INFO_TASKS);
-    const [getSubtasks] = useLazyQuery(GET_TASK_SUBTASKS);
+    const [getSubtasks, {data: dataSubtask, loading: loadingSubtask, error: errorSubtask}] = useLazyQuery(GET_TASK_SUBTASKS);
+    const [getInfoTask, {data: dataInfo, loading: loadingInfo, error: errorInfo}] = useLazyQuery(GET_INFO_TASK);
 
 
 
@@ -27,33 +27,52 @@ export const usePlanification = () => {
         setSelectedForm(null);
     }
 
-    const handleSave = async (task: { title: string; description: string; type: string; valley: string; faena: string }) => {
-        if (task.type === "Tarea") {
-            try {
-                const { data } = await createTask({
-                    variables: {
-                        input: {
-                            name: task.title,
-                            description: task.description,
-                            valleyId: Valleys.indexOf(task.valley) + 1,
-                            faenaId: Faenas.indexOf(task.faena) + 1,
-                            statusId: 1,
-                        },
+    const handleSaveTask = async (task: any) => {
+        try {
+            console.log("Saving task:", task);
+    
+            const { data } = await createTask({
+                variables: {
+                    input: {
+                        name: task.name,
+                        description: task.description,
+                        valleyId: task.valley,
+                        faenaId: task.faena,
+                        statusId: 1,
                     },
-                });
-                console.log("Task created successfully:", data.createTask);
-            } catch (err) {
-                console.error("Error creating task:", err);
+                },
+            });
+    
+            if (!data?.createTask?.id) {
+                throw new Error("Task creation failed: ID is undefined.");
             }
-        } else {
-            // Handle subtarea creation logic here
+    
+            console.log("Task created successfully:", data.createTask.id);
+    
+            const { data: infoData } = await createInfoTask({
+                variables: {
+                    input: {
+                        taskId: data.createTask.id,
+                        originId: task.origin,
+                        investmentId: task.investment,
+                        typeId: task.type,
+                        scopeId: task.scope,
+                        interactionId: task.interaction,
+                        riskId: task.risk,
+                    },
+                },
+            });
+    
+            console.log("Info task created successfully:", infoData.createInfoTask);
+        } catch (error) {
+            console.error("Error saving task:", error);
         }
-        setSelectedForm(null);
+    
         setIsPopupOpen(false);
+        setSelectedForm(null);
     };
 
     const handleOnTaskClick = (taskId: string) => {
-        console.log("Task clicked:", taskId);
         setSelectedTaskId((prev) => (prev === taskId ? null : taskId));
     };
 
@@ -75,7 +94,6 @@ export const usePlanification = () => {
                     );
     
                     const flattenedSubtasks = allSubtasks.flat();
-                    console.log("Subtasks fetched successfully:", flattenedSubtasks);
     
                     setSubtasks(flattenedSubtasks);
                 } catch (error) {
@@ -133,10 +151,28 @@ export const usePlanification = () => {
         };
     });
 
+    const handleSeeInformation = async (taskId: string) => {
+        try {
+            const { data: infoData } = await getInfoTask({
+                variables: { id: taskId },
+            });
+            if (infoData) {
+                return infoData.infoTask;
+            } else {
+                console.warn("No data found for the given task ID:", taskId);
+                return null;
+            }
+        }
+        catch (error) {
+            console.error("Error fetching task information:", error);
+            return null;
+        }
+    };
+
     return {
         setTableOption,
         handleAddTask,
-        handleSave,
+        handleSaveTask,
         handleOnTaskClick,
         toggleSidebar,
         createTask,
@@ -147,6 +183,7 @@ export const usePlanification = () => {
         setSelectedForm,
         handleCancel,
         formatDate,
+        handleSeeInformation,
         isPopupOpen,
         selectedTaskId,
         isSidebarOpen,

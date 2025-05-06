@@ -43,7 +43,7 @@ export default function DropdownMenu({ buttonText, items, onSelect, isInModal = 
       ref={dropdownRef}
       className={`relative w-full ${isInModal ? '' : 'md:w-1/4'}`} 
     >
-      <div className="z-1001">
+      <div className="z-3001">
         <Button
           variant="outline"
           onClick={toggleDropdown}
@@ -61,13 +61,13 @@ export default function DropdownMenu({ buttonText, items, onSelect, isInModal = 
         </Button>
       </div>
       {isOpen && (
-        <div className="absolute bg-white border rounded shadow-lg w-full text-sm md:text-base z-2000">
+        <div className="absolute bg-white border rounded shadow-lg w-full text-sm md:text-base z-3002">
           <ul>
             {items.map((item, index) => (
               <li
                 key={index}
                 onClick={() => handleSelect(item)}
-                className="p-2 hover:bg-gray-100 cursor-pointer z-3000"
+                className="p-2 hover:bg-gray-100 cursor-pointer z-3003"
               >
                 {item}
               </li>

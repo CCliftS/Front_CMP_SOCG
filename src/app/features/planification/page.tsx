@@ -5,12 +5,11 @@ import LoadingSpinner from "@/components/LoadinSpinner";
 import { Plus } from "lucide-react";
 import TasksTable from "./components/TasksTable";
 import Modal from "@/components/Modal";
-import TaskForm from "./components/TaskForm";
+import ValleyTaskForm from "./components/ValleyTaskForm";
 import { Button } from "@/components/ui/button";
 import { usePlanification } from "./hooks/usePlanification";
 import { useHooks } from "../hooks/useHooks";
 import Dropdown from "@/components/Dropdown";
-import { useState } from "react";
 
 
 export default function Planification() {
@@ -19,11 +18,10 @@ export default function Planification() {
         setSelectedForm,
         setIsPopupOpen,
         handleAddTask,
-        handleSave,
+        handleSaveTask,
         handleOnTaskClick,
         toggleSidebar,
         isPopupOpen,
-        data,
         loading,
         subTasks,
         selectedForm,
@@ -66,7 +64,7 @@ export default function Planification() {
                             <div className="flex flex-col gap-4">
                                 <h1 className="text-2xl font-bold">Planificación</h1>
                                 <div className="">
-                                    <div className="ml-4 flex-1">
+                                    <div className="mx-4 flex-1">
                                         <div className="flex flex-row justify-between items-center mb-4">
                                             <Button
                                                 onClick={handleAddTask}
@@ -96,10 +94,25 @@ export default function Planification() {
                     </div>
                     <Modal
                         isOpen={isPopupOpen}
-                        onClose={() => setIsPopupOpen(false)}
+                        onClose={() => {
+                            setIsPopupOpen(false);
+                            setSelectedForm(null); 
+                        }}
                         data-test-id="task-form-modal"
                     >
-                        {!selectedForm && (
+                        {selectedForm ? (
+                            <ValleyTaskForm
+                                onSave={handleSaveTask}
+                                onCancel={() => {
+                                    handleCancel();
+                                    setSelectedForm(null); 
+                                }}
+                                isEditing={false}
+                                details={false}
+                                valley={"Valle de Copiapó"}
+                                data-test-id="edit-task-form"
+                            />
+                        ) : (
                             <div className="flex flex-col items-center h-full">
                                 <p className="mb-4 text-center">Por favor, selecciona un formulario para continuar.</p>
                                 <div>
@@ -115,18 +128,6 @@ export default function Planification() {
                                 </div>
                             </div>
                         )}
-                        {selectedForm === "Tarea" ? (
-                            <TaskForm
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                                data-test-id="create-task-form"
-                            />
-                        ) : selectedForm === "Subtarea" ? (
-                            <div data-test-id="other-form">
-                                <h2>Subtareas</h2>
-                                <p>Este es un formulario diferente.</p>
-                            </div>
-                        ) : null}
                     </Modal>
                 </>
             )}
