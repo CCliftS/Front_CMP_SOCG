@@ -112,11 +112,23 @@ export const CREATE_SUBTASK = gql`
 `;
 
 export const UPDATE_SUBTASK = gql`
-  mutation UpdateSubtask($id: ID!, $input: UpdateSubtaskInput!) {
+  mutation UpdateSubtask($id: ID!, $input: UpdateSubtaskDto!) {
     updateSubtask(id: $id, input: $input) {
       id
       name
       description
+      budget
+      expense
+      startDate
+      endDate
+      priority {
+        id
+        name
+      }
+      status {
+        id
+        name
+      }
     }
   }
 `;

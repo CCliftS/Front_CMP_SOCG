@@ -24,6 +24,8 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
         setIsPopupSubtaskOpen,
         handleCreateSubtask,
         handleOnTaskClick,
+        handleUpdateTask,
+        handleUpdateSubtask,
         isPopupOpen, 
         isPopupSubtaskOpen,
         selectedInfoTask,
@@ -140,10 +142,11 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
                 {selectedInfoTask ? (
                     <ValleyTaskForm
                         onCancel={() => setIsPopupOpen(false)}
-                        onSave={() => {}}
+                        onSave={handleUpdateTask}
                         valley="Valle de Copiapó"
                         data-test-id="task-form"
                         details={true}
+                        isEditing={true}
                         infoTask={selectedInfoTask}
                     />
                 ) : (
@@ -154,7 +157,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
                 {selectedSubtask ? (
                     <ValleySubtaskForm
                         onCancel={() => setIsPopupSubtaskOpen(false)}
-                        onSave={handleCreateSubtask}
+                        onSave={handleUpdateSubtask}
                         valley="Valle de Copiapó"
                         isEditing={true}
                         data-test-id="subtask-form"

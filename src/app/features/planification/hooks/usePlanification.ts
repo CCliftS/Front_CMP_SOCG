@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { CREATE_TASK, GET_TASK, GET_TASK_SUBTASKS, GET_TASK_TOTAL_BUDGET, GET_TASK_TOTAL_EXPENSE, GET_TASKS } from "@/app/api/tasks";
-import { CREATE_INFO_TASK, GET_TASK_INFO } from "@/app/api/infoTask";
+import { CREATE_TASK, GET_TASK, GET_TASK_SUBTASKS, GET_TASK_TOTAL_BUDGET, GET_TASK_TOTAL_EXPENSE, GET_TASKS, UPDATE_TASK } from "@/app/api/tasks";
+import { CREATE_INFO_TASK, GET_TASK_INFO, UPDATE_INFO_TASK } from "@/app/api/infoTask";
 import { ISubtask } from "@/app/models/ISubtasks";
-import { CREATE_SUBTASK, GET_SUBTASK } from "@/app/api/subtasks";
+import { CREATE_SUBTASK, GET_SUBTASK, UPDATE_SUBTASK } from "@/app/api/subtasks";
 
 export const usePlanification = () => {
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
@@ -19,6 +19,10 @@ export const usePlanification = () => {
     const [createTask] = useMutation(CREATE_TASK);
     const [createSubtask] = useMutation(CREATE_SUBTASK);
     const [createInfoTask] = useMutation(CREATE_INFO_TASK);
+    const [updateTask] = useMutation(UPDATE_TASK); 
+    const [updateSubtask] = useMutation(UPDATE_SUBTASK); 
+    const [updateInfoTask] = useMutation(UPDATE_INFO_TASK);
+
     const { data, loading, error, refetch } = useQuery(GET_TASKS); 
     const [getSubtasks] = useLazyQuery(GET_TASK_SUBTASKS);
     const [getInfoTask] = useLazyQuery(GET_TASK_INFO);
@@ -26,6 +30,7 @@ export const usePlanification = () => {
     const [getTaskExpenses] = useLazyQuery(GET_TASK_TOTAL_EXPENSE);
     const [getTask] = useLazyQuery(GET_TASK);
     const [getSubtask] = useLazyQuery(GET_SUBTASK);
+    
 
     const handleAddTask = () => {
         setIsPopupOpen(true);
@@ -241,9 +246,9 @@ export const usePlanification = () => {
     };
 
     const handleSeeInformation = async (taskId: string) => {
+        setSelectedTaskId(taskId);
         try {
             const taskInfo = await handleGetInfoTask(taskId);
-            console.log("Task information:", taskInfo);
             if (taskInfo) {
                 setSelectedInfoTask(taskInfo);
                 setIsPopupOpen(true);
@@ -301,6 +306,77 @@ export const usePlanification = () => {
         }
     }
 
+    const handleUpdateSubtask = async (subtask: any) => {
+        try {
+            const { data } = await updateSubtask({
+                variables: {
+                    input: {
+                        id: selectedSubtask.id,
+                        taskId: selectedTaskId,
+                        number: subtask.number,
+                        name: subtask.name,
+                        description: subtask.description,
+                        budget: subtask.budget,
+                        startDate: subtask.startDate,
+                        endDate: subtask.endDate,
+                        statusId: 1,
+                        priorityId: subtask.priority,
+                    },
+                },
+            });
+            if (!data?.updateSubtask?.id) {
+                throw new Error("Subtask update failed: ID is undefined.");
+            }
+            console.log("Subtask updated successfully:", data.updateSubtask.id);
+            setIsPopupSubtaskOpen(false);
+            refetch(); 
+        }
+        catch (error) {
+            console.error("Error updating subtask:", error);
+        }
+    };
+
+    const handleUpdateTask = async (task: any) => {
+        try {
+            const { data } = await updateTask({
+                variables: {
+                    id: selectedTaskId,
+                    input: {
+                        name: task.name,
+                        description: task.description,
+                        statusId: task.state,
+                    },
+                },
+            });
+
+            if (!data?.updateTask?.id) {
+                throw new Error("Task update failed: ID is undefined.");
+            }
+            const { data: infoData } = await updateInfoTask({
+                variables: {
+                    id: selectedInfoTask.id,
+                    input: {
+                        taskId: selectedTaskId,
+                        originId: task.origin,
+                        investmentId: task.investment,
+                        typeId: task.type,
+                        scopeId: task.scope,
+                        interactionId: task.interaction,
+                        riskId: task.risk,
+                    },
+                },
+            });
+
+            console.log("Info task updated successfully:", infoData.updateInfoTask.id);
+            console.log("Task updated successfully:", data.updateTask.id); 
+            setIsPopupOpen(false);
+            setSelectedTaskId(data.updateTask.id);
+            window.location.reload();
+        }
+        catch (error) {
+            console.error("Error updating task:", error);
+        }
+    };
 
     return {
         setTableOption,
@@ -322,6 +398,8 @@ export const usePlanification = () => {
         handleGetTaskFaena,
         handleGetSubtask,
         handleCreateSubtask,
+        handleUpdateSubtask,
+        handleUpdateTask,
         isPopupOpen,
         isPopupSubtaskOpen,
         selectedTaskId,

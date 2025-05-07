@@ -101,28 +101,16 @@ export const UPDATE_INFO_TASK = gql`
   mutation UpdateInfoTask($id: ID!, $input: UpdateInfoTaskInput!) {
     updateInfoTask(id: $id, updateInfoTaskInput: $input) {
       id
-      taskId
-      originId
-      investmentId
-      typeId
-      scopeId
       interactionId
+      investmentId
+      originId
       riskId
+      scopeId
+      taskId
+      typeId
       task {
         id
         name
-        description
-        valleyId
-        faenaId
-        statusId
-        valley {
-            id
-            name
-        }
-        faena {
-            id
-            name
-        }
       }
     }
   }
@@ -160,6 +148,7 @@ export const GET_TASK_INFO = gql`
         id
         name
         description
+        statusId
       }
     }
   }

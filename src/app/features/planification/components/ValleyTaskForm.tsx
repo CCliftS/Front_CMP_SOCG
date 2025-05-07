@@ -2,8 +2,6 @@
 import { useValleyTaskForm } from "@/app/features/planification/hooks/useValleyTaskForm";
 import DropdownMenu from "@/components/Dropdown";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
-import { usePlanification } from "../hooks/usePlanification";
 
 interface ValleyTaskFormProps {
   onSave: any; // TODO: Define the type for the task object
@@ -15,34 +13,14 @@ interface ValleyTaskFormProps {
 }
 
 export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, details, infoTask }: ValleyTaskFormProps) {
+
   const {
     formState,
     faenas,
     dropdownItems,
     handleInputChange,
     handleSave,
-  } = useValleyTaskForm(onSave, valley);
-
-  const {handleGetTaskBudget, handleGetTaskExpenses, handleGetTaskFaena} = usePlanification();
-
-  useEffect(() => {
-    const fetchTaskDetails = async () => {
-      if (infoTask) {
-          handleInputChange("name", infoTask.task.name);
-          handleInputChange("description", infoTask.task.description);
-          handleInputChange("origin", infoTask.originId);
-          handleInputChange("investment", infoTask.investmentId);
-          handleInputChange("type", infoTask.typeId);
-          handleInputChange("scope", infoTask.scopeId);
-          handleInputChange("interaction", infoTask.interactionId);
-          handleInputChange("risk", infoTask.riskId);
-          handleInputChange("budget", await handleGetTaskBudget(infoTask.taskId));
-          handleInputChange("expenses", await handleGetTaskExpenses(infoTask.taskId));
-          handleInputChange("faena", await handleGetTaskFaena(infoTask.taskId));
-      }
-    };
-    fetchTaskDetails();
-  }, [infoTask]);
+  } = useValleyTaskForm(onSave, valley, undefined, isEditing, infoTask);
 
   return (
     <div data-test-id="task-form">
@@ -128,7 +106,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
             items={dropdownItems.state}
             onSelect={(value) => handleInputChange("state", value)}
             isInModal={true}
-            selectedValue={dropdownItems.state[infoTask?.statusId - 1]}
+            selectedValue={dropdownItems.state[infoTask?.task.statusId - 1]}
             data-test-id="task-state-dropdown"
           />
         </div>
@@ -177,6 +155,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
           items={faenas}
           onSelect={(value) => handleInputChange("faena", value)}
           isInModal={true}
+          disabled = {isEditing ? true : false}
           selectedValue={faenas[Number(formState.faena) - 1]}
           data-test-id="task-faena-dropdown"
         />

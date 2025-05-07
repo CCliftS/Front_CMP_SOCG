@@ -57,7 +57,9 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley 
                     data-test-id="subtask-budget-input"
                 />
             </div>
-            {/* <div className="mb-4 truncate">
+            {/*TODO: CAMBIAR POR DROPDOWN*/}
+
+            {/* <div className="mb-4 truncate">                                                                 
                 <label className="block text-sm font-medium mb-1">Beneficiario</label>
                 <input
                     type="text"
@@ -67,6 +69,7 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley 
                     data-test-id="subtask-beneficiary-input"
                 />
             </div> */}
+
             <div className="mb-4 truncate">
                 <label className="block text-sm font-medium mb-1">Fecha de Inicio</label>
                 <input
@@ -109,7 +112,7 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley 
                     data-test-id="subtask-expense-input"
                 />
             </div>
-            <div className="mb-4 truncate">
+            <div className="mb-4 truncate">                                                  {/*TODO: CAMBIAR POR DROPDOWN*/}
                 <label className="block text-sm font-medium mb-1">Estado</label>
                 <input
                     type="number"
@@ -122,7 +125,7 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley 
             </>
             )}
             <div className="mb-4 truncate">
-                <label className="block text-sm font-medium mb-1">Prioridad</label>
+                <label className="block text-sm font-medium mb-1">Prioridad</label>        {/*TODO: CAMBIAR POR DROPDOWN*/}
                 <input
                     type="number"
                     value={subtaskFormState.priority}

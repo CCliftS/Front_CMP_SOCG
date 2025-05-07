@@ -9,6 +9,7 @@ interface DropdownMenuProps {
   onSelect: (item: string) => void; 
   isInModal?: boolean; 
   selectedValue?: string;
+  disabled?: boolean;
 }
 
 export default function DropdownMenu({ 
@@ -16,7 +17,8 @@ export default function DropdownMenu({
   items, 
   onSelect, 
   isInModal = false, 
-  selectedValue 
+  selectedValue,
+  disabled = false // Asegúrate de que disabled tenga un valor predeterminado
 }: DropdownMenuProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null); 
@@ -29,13 +31,17 @@ export default function DropdownMenu({
   }, [selectedValue]);
 
   const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+    if (!disabled) { // Evita abrir el menú si está deshabilitado
+      setIsOpen(!isOpen);
+    }
   };
 
   const handleSelect = (item: string) => {
-    setSelectedItem(item); 
-    onSelect(item); 
-    setIsOpen(false); 
+    if (!disabled) { // Evita seleccionar un elemento si está deshabilitado
+      setSelectedItem(item); 
+      onSelect(item); 
+      setIsOpen(false); 
+    }
   };
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -60,7 +66,8 @@ export default function DropdownMenu({
         <Button
           variant="outline"
           onClick={toggleDropdown}
-          className="cursor-pointer"
+          className={`cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`} // Estilo visual para deshabilitado
+          disabled={disabled} // Deshabilita el botón
         >
           {selectedItem || buttonText} 
           <span className="ml-auto mt-1">
@@ -80,7 +87,9 @@ export default function DropdownMenu({
               <li
                 key={index}
                 onClick={() => handleSelect(item)}
-                className="p-2 hover:bg-gray-100 cursor-pointer z-3003"
+                className={`p-2 hover:bg-gray-100 cursor-pointer z-3003 ${
+                  disabled ? 'cursor-not-allowed text-gray-400' : ''
+                }`} 
               >
                 {item}
               </li>
