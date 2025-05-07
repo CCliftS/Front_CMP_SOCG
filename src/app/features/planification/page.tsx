@@ -17,14 +17,12 @@ export default function Planification() {
         setIsPopupOpen,
         handleAddTask,
         handleSaveTask,
-        handleOnTaskClick,
         toggleSidebar,
         isPopupOpen,
         loading,
         subTasks,
         selectedTaskId,
         isSidebarOpen,
-        tableOption,
         tasksWithDetails,
     } = usePlanification();
 
@@ -78,8 +76,6 @@ export default function Planification() {
                                             <TasksTable
                                                 tasks={tasksWithDetails}
                                                 subtasks={subTasks}
-                                                selectedTaskId={selectedTaskId}
-                                                onTaskClick={handleOnTaskClick}
                                                 data-test-id="tasks-table"
                                             />
                                         </div>

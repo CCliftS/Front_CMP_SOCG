@@ -22,7 +22,21 @@ interface InitialValues {
     faena?: string;
 }
 
-export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, initialValues?: InitialValues) => {
+interface SubtasksInitialValues {
+    name?: string;
+    number?: string;
+    description?: string;
+    budget?: string;
+    expenses?: string;
+    startDate?: string;
+    endDate?: string;
+    finishDate?: string;
+    beneficiary?: string;
+    state?: string;
+    priority?: string;
+}
+
+export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, initialValues?: InitialValues, subtasksInitialValues?: SubtasksInitialValues) => {
     const [formState, setFormState] = useState({
         name: initialValues?.name || "",
         description: initialValues?.description || "",
@@ -42,10 +56,29 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, in
         faena: initialValues?.faena || "",
     });
 
+    const [subtaskFormState, setSubtaskFormState] = useState({
+        name: subtasksInitialValues?.name || "",
+        number: subtasksInitialValues?.number || "",
+        description: subtasksInitialValues?.description || "",
+        budget: subtasksInitialValues?.budget || "",
+        expenses: subtasksInitialValues?.expenses || "",
+        startDate: subtasksInitialValues?.startDate || "",
+        endDate: subtasksInitialValues?.endDate || "",
+        finishDate: subtasksInitialValues?.finishDate || "",
+        beneficiary: subtasksInitialValues?.beneficiary || "",
+        state: subtasksInitialValues?.state || "",
+        priority: subtasksInitialValues?.priority || "",
+    });
+
+
     const [faenas, setFaenas] = useState<string[]>([]);
 
     const handleInputChange = useCallback((field: string, value: string) => {
         setFormState((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
+    const handleSubtaskInputChange = useCallback((field: string, value: string) => {
+        setSubtaskFormState((prev) => ({ ...prev, [field]: value }));
     }, []);
 
     const handleSave = useCallback(() => {
@@ -82,6 +115,31 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, in
         });
         setFaenas([]);
     }, [formState, onSave]);
+
+    const handleSaveSubtask = useCallback(() => {
+        const subtaskDetails = {
+            ...subtaskFormState,
+            number: parseInt(subtaskFormState.number) || 1,
+            budget: parseInt(subtaskFormState.budget) || 0,
+            expenses: parseInt(subtaskFormState.expenses) || 0,
+            priority: parseInt(subtaskFormState.priority) || 1,
+            status: parseInt(subtaskFormState.state) || 1,
+        };
+        onSave(subtaskDetails);
+        setSubtaskFormState({
+            name: "",
+            number: "",
+            description: "",
+            budget: "",
+            expenses: "",
+            startDate: "",
+            endDate: "",
+            finishDate: "",
+            beneficiary: "",
+            state: "",
+            priority: "",
+        });
+    }, [subtaskFormState, onSave]);
 
     const handleValleySelect = useCallback((valley: string) => {
         switch (valley) {
@@ -120,9 +178,12 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, in
 
     return {
         formState,
+        subtaskFormState,
         faenas,
         dropdownItems,
         handleInputChange,
+        handleSubtaskInputChange,
         handleSave,
+        handleSaveSubtask,
     };
 };

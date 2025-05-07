@@ -37,6 +37,23 @@ export const GET_SUBTASK = gql`
       id
       name
       description
+      budget
+      expense
+      startDate
+      endDate
+      finalDate
+      beneficiaryId
+      statusId
+      priorityId
+      status {
+        id
+        name
+        percentage
+      }
+      priority {
+        id
+        name
+      }
     }
   }
 `;
@@ -73,27 +90,20 @@ export const GET_VALLEY_SUBTASKS = gql`
 // MUTATIONS
 
 export const CREATE_SUBTASK = gql`
-  mutation CreateSubtask($input: CreateSubtaskInput!) {
+  mutation CreateSubtask($input: CreateSubtaskDto!) {
     createSubtask(input: $input) {
       id
-      taskId
-      number
       name
       description
       budget
       expense
       startDate
       endDate
-      finalDate
-      beneficiaryId
-      statusId
-      priorityId
-      status {
+      priority {
         id
         name
-        percentage
       }
-      priority {
+      status {
         id
         name
       }

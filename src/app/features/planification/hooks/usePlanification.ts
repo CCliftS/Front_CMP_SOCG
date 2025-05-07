@@ -3,15 +3,21 @@ import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import { CREATE_TASK, GET_TASK, GET_TASK_SUBTASKS, GET_TASK_TOTAL_BUDGET, GET_TASK_TOTAL_EXPENSE, GET_TASKS } from "@/app/api/tasks";
 import { CREATE_INFO_TASK, GET_TASK_INFO } from "@/app/api/infoTask";
 import { ISubtask } from "@/app/models/ISubtasks";
+import { CREATE_SUBTASK, GET_SUBTASK } from "@/app/api/subtasks";
 
 export const usePlanification = () => {
     const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
+    const [isPopupSubtaskOpen, setIsPopupSubtaskOpen] = useState<boolean>(false);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
     const [tableOption, setTableOption] = useState<string>("Tareas");
     const [subTasks, setSubtasks] = useState<ISubtask[]>([]);
     const [selectedInfoTask, setSelectedInfoTask] = useState<any>(null);
+    const [selectedSubtask, setSelectedSubtask] = useState<any>(null);
+    const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
     const [createTask] = useMutation(CREATE_TASK);
+    const [createSubtask] = useMutation(CREATE_SUBTASK);
     const [createInfoTask] = useMutation(CREATE_INFO_TASK);
     const { data, loading, error, refetch } = useQuery(GET_TASKS); 
     const [getSubtasks] = useLazyQuery(GET_TASK_SUBTASKS);
@@ -19,6 +25,7 @@ export const usePlanification = () => {
     const [getTaskBudget] = useLazyQuery(GET_TASK_TOTAL_BUDGET);
     const [getTaskExpenses] = useLazyQuery(GET_TASK_TOTAL_EXPENSE);
     const [getTask] = useLazyQuery(GET_TASK);
+    const [getSubtask] = useLazyQuery(GET_SUBTASK);
 
     const handleAddTask = () => {
         setIsPopupOpen(true);
@@ -30,8 +37,6 @@ export const usePlanification = () => {
 
     const handleSaveTask = async (task: any) => {
         try {
-            console.log("Saving task:", task);
-
             const { data } = await createTask({
                 variables: {
                     input: {
@@ -76,6 +81,7 @@ export const usePlanification = () => {
 
     const handleOnTaskClick = (taskId: string) => {
         setSelectedTaskId((prev) => (prev === taskId ? null : taskId));
+        setExpandedRow((prev) => (prev === taskId ? null : taskId));
     };
 
     const toggleSidebar = () => {
@@ -214,6 +220,26 @@ export const usePlanification = () => {
         }
     };
 
+    const handleGetSubtask = async (subtaskId: string) => {
+        console.log("Fetching subtask with ID:", subtaskId);
+        try {
+            const { data: subtaskData } = await getSubtask({
+                variables: { id: subtaskId },
+            });
+            if (subtaskData) {
+                setSelectedSubtask(subtaskData.subtask);
+                console.log(selectedSubtask);
+                return subtaskData.subtask;
+            } else {
+                console.warn("No data found for the given subtask ID:", subtaskId);
+                return null;
+            }
+        } catch (error) {
+            console.error("Error fetching subtask:", error);
+            return null;
+        }
+    };
+
     const handleSeeInformation = async (taskId: string) => {
         try {
             const taskInfo = await handleGetInfoTask(taskId);
@@ -246,6 +272,36 @@ export const usePlanification = () => {
         }
     }
 
+    const handleCreateSubtask = async (subtask: any) => {
+        try {
+            const { data } = await createSubtask({
+                variables: {
+                    input: {
+                        taskId: selectedTaskId,
+                        number: subtask.number,
+                        name: subtask.name,
+                        description: subtask.description,
+                        budget: subtask.budget,
+                        startDate: subtask.startDate,
+                        endDate: subtask.endDate,
+                        statusId: 1,
+                        priorityId: subtask.priority,
+                    },
+                },
+            });
+            if (!data?.createSubtask?.id) {
+                throw new Error("Subtask creation failed: ID is undefined.");
+            }
+            console.log("Subtask created successfully:", data.createSubtask.id);
+            setIsPopupSubtaskOpen(false);
+            refetch(); 
+        }
+        catch (error) {
+            console.error("Error creating subtask:", error);
+        }
+    }
+
+
     return {
         setTableOption,
         handleAddTask,
@@ -255,6 +311,7 @@ export const usePlanification = () => {
         createTask,
         getRemainingDays,
         setIsPopupOpen,
+        setIsPopupSubtaskOpen,
         setSelectedTaskId,
         setIsSidebarOpen,
         handleCancel,
@@ -263,7 +320,10 @@ export const usePlanification = () => {
         handleGetTaskBudget,
         handleGetTaskExpenses,
         handleGetTaskFaena,
+        handleGetSubtask,
+        handleCreateSubtask,
         isPopupOpen,
+        isPopupSubtaskOpen,
         selectedTaskId,
         isSidebarOpen,
         tableOption,
@@ -273,5 +333,7 @@ export const usePlanification = () => {
         subTasks,
         tasksWithDetails,
         selectedInfoTask,
+        selectedSubtask,
+        expandedRow,
     };
 };
