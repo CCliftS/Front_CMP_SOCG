@@ -3,7 +3,6 @@ import { HuascoValley, CopiapoValley, ElquiValley } from "@/constants/faenas";
 import { taskOrigin, taskType, taskScope, taskInteraction, taskState, taskRisk, taskInvestment } from "@/constants/infoTasks";
 import { Valleys } from "@/constants/valleys";
 import { usePlanification } from "./usePlanification";
-import { subtaskPriority, subtaskState } from "@/constants/subtask";
 
 export interface InitialValues {
     name?: string;
@@ -24,25 +23,10 @@ export interface InitialValues {
     faena?: number;
 }
 
-interface SubtasksInitialValues {
-    name?: string;
-    number?: string;
-    description?: string;
-    budget?: string;
-    expenses?: string;
-    startDate?: string;
-    endDate?: string;
-    finishDate?: string;
-    beneficiary?: string;
-    state?: string;
-    priority?: string;
-}
-
 export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  isEditing?:boolean, infoTask?:any, subtask?: any) => {
     
     const { handleGetTaskBudget, handleGetTaskExpenses, handleGetTaskFaena } = usePlanification();
     const [initialValues, setInitialValues] = useState<InitialValues | undefined>(undefined);
-    const [subtasksInitialValues, setSubtasksInitialValues] = useState<SubtasksInitialValues | undefined>(undefined);
    
     const [formState, setFormState] = useState({
         name: initialValues?.name || "",
@@ -57,20 +41,6 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
         expenses: initialValues?.expenses || "",
         risk: initialValues?.risk || "",
         faena: initialValues?.faena || "",
-    });
-
-    const [subtaskFormState, setSubtaskFormState] = useState({
-        name: subtasksInitialValues?.name || "",
-        number: subtasksInitialValues?.number || "",
-        description: subtasksInitialValues?.description || "",
-        budget: subtasksInitialValues?.budget || "",
-        expenses: subtasksInitialValues?.expenses || "",
-        startDate: subtasksInitialValues?.startDate || "",
-        endDate: subtasksInitialValues?.endDate || "",
-        finishDate: subtasksInitialValues?.finishDate || "",
-        beneficiary: subtasksInitialValues?.beneficiary || "",
-        state: subtasksInitialValues?.state || "",
-        priority: subtasksInitialValues?.priority || "",
     });
 
     const fetchInitialValues = async () => {
@@ -101,40 +71,8 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
         }
     };
 
-    const fetchSubtaskInitialValues = async () => {
-        if (subtask) {
-          try {
-
-            const formatDateForInput = (dateString: string | null | undefined) => {
-                if (!dateString) return "";
-                const date = new Date(dateString);
-                if (isNaN(date.getTime())) return "";
-                return date.toISOString().split('T')[0]; 
-              };
-
-            setSubtasksInitialValues({
-              name: subtask.name || "",
-              number: subtask.number || "",
-              description: subtask.description || "",
-              budget: subtask.budget || "",
-              expenses: subtask.expense || "",
-              startDate: formatDateForInput(subtask.startDate) || "",
-              endDate: formatDateForInput(subtask.endDate) || "",
-              finishDate: formatDateForInput(subtask.finishDate) || "",
-              beneficiary: subtask.beneficiary || "",
-              state: subtask.statusId || "",
-              priority: subtask.priorityId || "",
-            });
-          }
-          catch (error) {
-            console.error("Error fetching initial values:", error);
-          }
-        }
-    };
-
     useEffect(() => {
         fetchInitialValues();
-        fetchSubtaskInitialValues();
       }, [infoTask,subtask]);
 
     useEffect(() => {
@@ -154,32 +92,13 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
                 faena: initialValues.faena || "",
             });
         }
-        if(subtasksInitialValues) {
-            setSubtaskFormState({
-                name: subtasksInitialValues.name || "",
-                number: subtasksInitialValues.number || "",
-                description: subtasksInitialValues.description || "",
-                budget: subtasksInitialValues.budget || "",
-                expenses: subtasksInitialValues.expenses || "",
-                startDate: subtasksInitialValues.startDate || "",
-                endDate: subtasksInitialValues.endDate || "",
-                finishDate: subtasksInitialValues.finishDate || "",
-                beneficiary: subtasksInitialValues.beneficiary || "",
-                state: subtasksInitialValues.state || "",
-                priority: subtasksInitialValues.priority || "",
-            });
-        }
-    }, [initialValues, subtasksInitialValues]);
+    }, [initialValues]);
     
 
     const [faenas, setFaenas] = useState<string[]>([]);
 
     const handleInputChange = useCallback((field: string, value: string) => {
         setFormState((prev) => ({ ...prev, [field]: value }));
-    }, []);
-
-    const handleSubtaskInputChange = useCallback((field: string, value: string) => {
-        setSubtaskFormState((prev) => ({ ...prev, [field]: value }));
     }, []);
 
     const handleSave = useCallback(() => {
@@ -227,31 +146,6 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
         setFaenas([]);
     }, [formState, onSave]);
 
-    const handleSaveSubtask = useCallback(() => {
-        const subtaskDetails = {
-            ...subtaskFormState,
-            number: parseInt(subtaskFormState.number) || 1,
-            budget: parseInt(subtaskFormState.budget) || 0,
-            expenses: parseInt(subtaskFormState.expenses) || 0,
-            priority: Number(subtaskFormState.priority) ? Number(subtaskFormState.priority) : subtaskPriority.findIndex((p) => p === subtaskFormState.priority) + 1,
-            status: Number(subtaskFormState.state) ? Number(subtaskFormState.state) : subtaskState.findIndex((s) => s === subtaskFormState.state) + 1,
-        };
-        onSave(subtaskDetails);
-        setSubtaskFormState({
-            name: "",
-            number: "",
-            description: "",
-            budget: "",
-            expenses: "",
-            startDate: "",
-            endDate: "",
-            finishDate: "",
-            beneficiary: "",
-            state: "",
-            priority: "",
-        });
-    }, [subtaskFormState, onSave]);
-
     const handleValleySelect = useCallback((valley: string) => {
         switch (valley) {
             case "Valle de Copiapó":
@@ -284,18 +178,13 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
         state: taskState,
         risk : taskRisk,
         investment: taskInvestment,
-        subtaskState: subtaskState,
-        subtaskPriority: subtaskPriority,
     }), []);
 
     return {
         formState,
-        subtaskFormState,
         faenas,
         dropdownItems,
         handleInputChange,
-        handleSubtaskInputChange,
         handleSave,
-        handleSaveSubtask,
     };
 };

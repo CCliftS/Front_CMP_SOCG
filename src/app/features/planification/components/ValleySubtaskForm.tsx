@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useValleyTaskForm } from "../hooks/useValleyTaskForm";
+import { useValleySubtasksForm } from "../hooks/useValleySubtasksForm";
 import DropdownMenu from "@/components/Dropdown";
 
 interface ValleySubtaskFormProps {
@@ -16,7 +16,7 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley,
         dropdownItems,
         handleSubtaskInputChange,
         handleSaveSubtask,
-    } = useValleyTaskForm(onSave, valley, isEditing, undefined, subtask);
+    } = useValleySubtasksForm(onSave, subtask);
 
     return (
         <div data-test-id="subtask-form">
@@ -60,19 +60,17 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley,
                     data-test-id="subtask-budget-input"
                 />
             </div>
-            {/*TODO: CAMBIAR POR DROPDOWN*/}
-
-            {/* <div className="mb-4 truncate">                                                                 
+            <div className="mb-4">                                                                 
                 <label className="block text-sm font-medium mb-1">Beneficiario</label>
-                <input
-                    type="text"
-                    value={subtaskFormState.beneficiary}
-                    onChange={(e) => handleSubtaskInputChange("beneficiary", e.target.value)}
-                    className="w-full border rounded px-3 py-2"
-                    data-test-id="subtask-beneficiary-input"
+                <DropdownMenu 
+                    buttonText="Seleccione Beneficiario"
+                    items={dropdownItems.beneficiaries}
+                    onSelect={(value) => handleSubtaskInputChange("beneficiary", value)}
+                    isInModal={true}
+                    selectedValue={subtaskFormState.beneficiary}
+                    data-test-id="subtask-beneficiary-dropdown"
                 />
-            </div> */}
-
+            </div>
             <div className="mb-4 truncate">
                 <label className="block text-sm font-medium mb-1">Fecha de Inicio</label>
                 <input

@@ -21,9 +21,8 @@ export default function Planification() {
         isPopupOpen,
         loading,
         subTasks,
-        selectedTaskId,
         isSidebarOpen,
-        tasksWithDetails,
+        detailedTasks,
     } = usePlanification();
 
     const { userRole } = useHooks();
@@ -74,7 +73,7 @@ export default function Planification() {
                                         </div>
                                         <div>
                                             <TasksTable
-                                                tasks={tasksWithDetails}
+                                                tasks={detailedTasks}
                                                 subtasks={subTasks}
                                                 data-test-id="tasks-table"
                                             />

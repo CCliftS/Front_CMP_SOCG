@@ -15,6 +15,7 @@ export const usePlanification = () => {
     const [selectedInfoTask, setSelectedInfoTask] = useState<any>(null);
     const [selectedSubtask, setSelectedSubtask] = useState<any>(null);
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
+    const [detailedTasks, setDetailedTasks] = useState<any[]>([]);
 
     const [createTask] = useMutation(CREATE_TASK);
     const [createSubtask] = useMutation(CREATE_SUBTASK);
@@ -153,31 +154,52 @@ export const usePlanification = () => {
         return `${day}-${month}-${year}`;
     };
 
-    const tasksWithDetails = data?.tasks.map((task: any) => {
-        const associatedSubtasks = subTasks.filter((subtask) => subtask.taskId === task.id);
+    const loadTasksWithDetails = async () => {
+        if (!data?.tasks) return [];
+        
+        const detailedTasks = await Promise.all(data.tasks.map(async (task: any) => {
+            const associatedSubtasks = subTasks.filter((subtask) => subtask.taskId === task.id);
+            
+            const budget = await handleGetTaskBudget(task.id);
+            
+            const startDate = associatedSubtasks.length
+                ? new Date(Math.min(...associatedSubtasks.map((subtask) => new Date(subtask.startDate).getTime())))
+                : null;
+        
+            const endDate = associatedSubtasks.length
+                ? new Date(Math.max(...associatedSubtasks.map((subtask) => new Date(subtask.endDate).getTime())))
+                : null;
+        
+            const validFinalDates = associatedSubtasks
+                .filter(subtask => subtask.finalDate && !isNaN(new Date(subtask.finalDate).getTime()))
+                .map(subtask => new Date(subtask.finalDate).getTime());
+            
+            const finishDate = validFinalDates.length > 0
+                ? new Date(Math.max(...validFinalDates))
+                : null;
+        
+            return {
+                ...task,
+                budget: budget || 0,  
+                startDate: startDate ? startDate.toISOString() : "-",
+                endDate: endDate ? endDate.toISOString() : "-",
+                finishDate: finishDate ? finishDate.toISOString() : "-",
+            };
+        }));
+        
+        return detailedTasks;
+    };
 
-        const totalBudget = associatedSubtasks.reduce((sum, subtask) => sum + (subtask.budget || 0), 0);  /* TODO: REMPLAZAR POR getTaskBudget*/
-
-        const startDate = associatedSubtasks.length
-            ? new Date(Math.min(...associatedSubtasks.map((subtask) => new Date(subtask.startDate).getTime())))
-            : null;
-
-        const endDate = associatedSubtasks.length
-            ? new Date(Math.max(...associatedSubtasks.map((subtask) => new Date(subtask.endDate).getTime())))
-            : null;
-
-        const finishDate = associatedSubtasks.length
-            ? new Date(Math.max(...associatedSubtasks.map((subtask) => new Date(subtask.finalDate).getTime())))
-            : null;
-
-        return {
-            ...task,
-            budget: totalBudget,
-            startDate: startDate ? startDate.toISOString() : "-",
-            endDate: endDate ? endDate.toISOString() : "-",
-            finishDate: finishDate ? finishDate.toISOString() : "-",
+    useEffect(() => {
+        const fetchTaskDetails = async () => {
+            if (!loading && data?.tasks && subTasks.length > 0) {
+                const tasks = await loadTasksWithDetails();
+                setDetailedTasks(tasks);
+            }
         };
-    });
+        
+        fetchTaskDetails();
+    }, [data, loading, subTasks]);
 
     const handleGetTaskBudget = async (taskId: string) => {
         try {
@@ -294,6 +316,7 @@ export const usePlanification = () => {
     }
 
     const handleCreateSubtask = async (subtask: any) => {
+        console.log("Creating subtask with data:", subtask);
         try {
             const { data } = await createSubtask({
                 variables: {
@@ -305,6 +328,7 @@ export const usePlanification = () => {
                         budget: subtask.budget,
                         startDate: subtask.startDate,
                         endDate: subtask.endDate,
+                        beneficiaryId: subtask.beneficiaryId ? subtask.beneficiaryId : null,
                         statusId: 1,
                         priorityId: subtask.priority,
                     },
@@ -336,6 +360,7 @@ export const usePlanification = () => {
                         description: subtask.description,
                         budget: subtask.budget,
                         expense: subtask.expenses,
+                        beneficiaryId: subtask.beneficiaryId ? subtask.beneficiaryId : null,
                         startDate: subtask.startDate,
                         endDate: subtask.endDate,
                         statusId: subtask.status,
@@ -431,7 +456,7 @@ export const usePlanification = () => {
         loading,
         error,
         subTasks,
-        tasksWithDetails,
+        detailedTasks,
         selectedInfoTask,
         selectedSubtask,
         expandedRow,

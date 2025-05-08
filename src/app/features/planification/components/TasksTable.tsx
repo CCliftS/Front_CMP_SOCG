@@ -183,7 +183,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
                 beneficiary: "",
                 status: "",  
                 priorityId: "",     
-                taskId: expandedRow // ID de la tarea actual
+                taskId: expandedRow 
             }}
         />
     )}
