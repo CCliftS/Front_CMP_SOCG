@@ -37,10 +37,11 @@ interface SubtasksInitialValues {
     priority?: string;
 }
 
-export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, subtasksInitialValues?: SubtasksInitialValues, isEditing?:boolean, infoTask?:any) => {
+export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  isEditing?:boolean, infoTask?:any, subtask?: any) => {
     
     const { handleGetTaskBudget, handleGetTaskExpenses, handleGetTaskFaena } = usePlanification();
     const [initialValues, setInitialValues] = useState<InitialValues | undefined>(undefined);
+    const [subtasksInitialValues, setSubtasksInitialValues] = useState<SubtasksInitialValues | undefined>(undefined);
    
     const [formState, setFormState] = useState({
         name: initialValues?.name || "",
@@ -71,38 +72,61 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, su
         priority: subtasksInitialValues?.priority || "",
     });
 
+    const fetchInitialValues = async () => {
+        if (infoTask) {
+          try {
+            const budget = await handleGetTaskBudget(infoTask.taskId);
+            const expenses = await handleGetTaskExpenses(infoTask.taskId);
+            const faena = await handleGetTaskFaena(infoTask.taskId);
+
+            setInitialValues({
+              name: infoTask.task.name || "",
+              description: infoTask.task.description || "",
+              origin: infoTask.originId || "",
+              investment: infoTask.investmentId || "",
+              type: infoTask.typeId || "",
+              scope: infoTask.scopeId || "",
+              interaction: infoTask.interactionId || "",
+              risk: infoTask.riskId || "",
+              state: infoTask.task.statusId || "",
+              budget: budget || "",
+              expenses: expenses || "",
+              faena: faena || "",
+            });
+          }
+          catch (error) {
+            console.error("Error fetching initial values:", error);
+          }
+        }
+    };
+
+    const fetchSubtaskInitialValues = async () => {
+        if (subtask) {
+          try {
+            setSubtasksInitialValues({
+              name: subtask.name || "",
+              number: subtask.number || "",
+              description: subtask.description || "",
+              budget: subtask.budget || "",
+              expenses: subtask.expenses || "",
+              startDate: subtask.startDate || "",
+              endDate: subtask.endDate || "",
+              finishDate: subtask.finishDate || "",
+              beneficiary: subtask.beneficiary || "",
+              state: subtask.statusId || "",
+              priority: subtask.priorityId || "",
+            });
+          }
+          catch (error) {
+            console.error("Error fetching initial values:", error);
+          }
+        }
+    };
 
     useEffect(() => {
-        const fetchInitialValues = async () => {
-          if (infoTask) {
-            try {
-              const budget = await handleGetTaskBudget(infoTask.taskId);
-              const expenses = await handleGetTaskExpenses(infoTask.taskId);
-              const faena = await handleGetTaskFaena(infoTask.taskId);
-
-              setInitialValues({
-                name: infoTask.task.name || "",
-                description: infoTask.task.description || "",
-                origin: infoTask.originId || "",
-                investment: infoTask.investmentId || "",
-                type: infoTask.typeId || "",
-                scope: infoTask.scopeId || "",
-                interaction: infoTask.interactionId || "",
-                risk: infoTask.riskId || "",
-                state: infoTask.task.statusId || "",
-                budget: budget || "",
-                expenses: expenses || "",
-                faena: faena || "",
-              });
-            }
-            catch (error) {
-              console.error("Error fetching initial values:", error);
-            }
-          }
-        };
-      
         fetchInitialValues();
-      }, [infoTask]);
+        fetchSubtaskInitialValues();
+      }, [infoTask,subtask]);
 
     useEffect(() => {
         if (initialValues) {
@@ -121,8 +145,22 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string, su
                 faena: initialValues.faena || "",
             });
         }
-        console.log(initialValues?.state)
-    }, [initialValues]);
+        if(subtasksInitialValues) {
+            setSubtaskFormState({
+                name: subtasksInitialValues.name || "",
+                number: subtasksInitialValues.number || "",
+                description: subtasksInitialValues.description || "",
+                budget: subtasksInitialValues.budget || "",
+                expenses: subtasksInitialValues.expenses || "",
+                startDate: subtasksInitialValues.startDate || "",
+                endDate: subtasksInitialValues.endDate || "",
+                finishDate: subtasksInitialValues.finishDate || "",
+                beneficiary: subtasksInitialValues.beneficiary || "",
+                state: subtasksInitialValues.state || "",
+                priority: subtasksInitialValues.priority || "",
+            });
+        }
+    }, [initialValues, subtasksInitialValues]);
     
 
     const [faenas, setFaenas] = useState<string[]>([]);

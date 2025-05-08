@@ -161,6 +161,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
                         valley="Valle de Copiapó"
                         isEditing={true}
                         data-test-id="subtask-form"
+                        subtask={selectedSubtask}
                     />
                 ) : (
                     <ValleySubtaskForm

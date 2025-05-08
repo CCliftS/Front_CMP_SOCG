@@ -20,7 +20,7 @@ export default function ValleyTaskForm({ onSave, onCancel, isEditing, valley, de
     dropdownItems,
     handleInputChange,
     handleSave,
-  } = useValleyTaskForm(onSave, valley, undefined, isEditing, infoTask);
+  } = useValleyTaskForm(onSave, valley, isEditing, infoTask);
 
   return (
     <div data-test-id="task-form">

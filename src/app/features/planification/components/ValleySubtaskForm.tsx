@@ -6,14 +6,15 @@ interface ValleySubtaskFormProps {
     onCancel: () => void;
     isEditing?: boolean;
     valley: string;
+    subtask?: any; // TODO: Define the type for the subtask object
 }
 
-export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley }: ValleySubtaskFormProps) {
+export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley, subtask }: ValleySubtaskFormProps) {
     const {
         subtaskFormState,
         handleSubtaskInputChange,
         handleSaveSubtask,
-    } = useValleyTaskForm(onSave, valley);
+    } = useValleyTaskForm(onSave, valley, isEditing, undefined, subtask);
 
     return (
         <div data-test-id="subtask-form">

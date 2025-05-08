@@ -233,6 +233,7 @@ export const usePlanification = () => {
             });
             if (subtaskData) {
                 setSelectedSubtask(subtaskData.subtask);
+                setIsPopupSubtaskOpen(true);
                 console.log(selectedSubtask);
                 return subtaskData.subtask;
             } else {
@@ -337,6 +338,8 @@ export const usePlanification = () => {
     };
 
     const handleUpdateTask = async (task: any) => {
+        console.log(task);
+        console.log(selectedTaskId);
         try {
             const { data } = await updateTask({
                 variables: {
