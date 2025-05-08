@@ -36,6 +36,7 @@ export const GET_SUBTASK = gql`
     subtask(id: $id) {
       id
       name
+      number
       description
       budget
       expense
@@ -121,14 +122,25 @@ export const UPDATE_SUBTASK = gql`
       expense
       startDate
       endDate
+      finalDate
+      number
+      priorityId
       priority {
         id
         name
       }
+      statusId
       status {
         id
         name
+        percentage
       }
+      beneficiaryId
+      beneficiary {
+        id
+        legalName
+      }
+      taskId
     }
   }
 `;

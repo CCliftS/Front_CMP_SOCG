@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useValleyTaskForm } from "../hooks/useValleyTaskForm";
+import DropdownMenu from "@/components/Dropdown";
 
 interface ValleySubtaskFormProps {
     onSave: any; // TODO: Define the type for the task object
@@ -12,6 +13,7 @@ interface ValleySubtaskFormProps {
 export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley, subtask }: ValleySubtaskFormProps) {
     const {
         subtaskFormState,
+        dropdownItems,
         handleSubtaskInputChange,
         handleSaveSubtask,
     } = useValleyTaskForm(onSave, valley, isEditing, undefined, subtask);
@@ -113,26 +115,28 @@ export default function ValleySubtaskForm({ onSave, onCancel, isEditing, valley,
                     data-test-id="subtask-expense-input"
                 />
             </div>
-            <div className="mb-4 truncate">                                                  {/*TODO: CAMBIAR POR DROPDOWN*/}
+            <div className="mb-4">                                                 
                 <label className="block text-sm font-medium mb-1">Estado</label>
-                <input
-                    type="number"
-                    value={subtaskFormState.state}
-                    onChange={(e) => handleSubtaskInputChange("state", e.target.value)}
-                    className="w-full border rounded px-3 py-2"
-                    data-test-id="subtask-state-input"
+                <DropdownMenu
+                    buttonText="Seleccione Estado"
+                    items={dropdownItems.subtaskState}
+                    onSelect={(value) => {handleSubtaskInputChange("state", value)}}
+                    isInModal={true}
+                    selectedValue={dropdownItems.subtaskState[subtask.status.id - 1]}
+                    data-test-id="subtask-state-dropdown"
                 />
             </div>
             </>
             )}
-            <div className="mb-4 truncate">
-                <label className="block text-sm font-medium mb-1">Prioridad</label>        {/*TODO: CAMBIAR POR DROPDOWN*/}
-                <input
-                    type="number"
-                    value={subtaskFormState.priority}
-                    onChange={(e) => handleSubtaskInputChange("priority", e.target.value)}
-                    className="w-full border rounded px-3 py-2"
-                    data-test-id="subtask-priority-input"
+            <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Prioridad</label>
+                <DropdownMenu
+                    buttonText="Seleccione Prioridad"
+                    items={dropdownItems.subtaskPriority}
+                    onSelect={(value) => handleSubtaskInputChange("priority", value)}
+                    isInModal={true}
+                    selectedValue={dropdownItems.subtaskPriority[subtask.priorityId - 1]}
+                    data-test-id="subtask-priority-dropdown"
                 />
             </div>
             <div className="flex justify-end space-x-2">

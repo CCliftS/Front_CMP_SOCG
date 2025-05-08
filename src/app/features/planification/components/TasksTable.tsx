@@ -26,6 +26,8 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
         handleOnTaskClick,
         handleUpdateTask,
         handleUpdateSubtask,
+        handleCancel,
+        handleCancelSubtask,
         isPopupOpen, 
         isPopupSubtaskOpen,
         selectedInfoTask,
@@ -141,7 +143,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
             <Modal isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
                 {selectedInfoTask ? (
                     <ValleyTaskForm
-                        onCancel={() => setIsPopupOpen(false)}
+                        onCancel={handleCancel}
                         onSave={handleUpdateTask}
                         valley="Valle de Copiapó"
                         data-test-id="task-form"
@@ -154,24 +156,38 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, subtasks }) => {
                 )}
             </Modal>
             <Modal isOpen={isPopupSubtaskOpen} onClose={() => setIsPopupSubtaskOpen(false)}>
-                {selectedSubtask ? (
-                    <ValleySubtaskForm
-                        onCancel={() => setIsPopupSubtaskOpen(false)}
-                        onSave={handleUpdateSubtask}
-                        valley="Valle de Copiapó"
-                        isEditing={true}
-                        data-test-id="subtask-form"
-                        subtask={selectedSubtask}
-                    />
-                ) : (
-                    <ValleySubtaskForm
-                        onCancel={() => setIsPopupSubtaskOpen(false)}
-                        onSave={handleCreateSubtask}
-                        valley="Valle de Copiapó"
-                        data-test-id="subtask-form"
-                    />
-                )}
-            </Modal>
+    {selectedSubtask ? (
+        <ValleySubtaskForm
+            onCancel={handleCancelSubtask}
+            onSave={handleUpdateSubtask}
+            valley="Valle de Copiapó"
+            isEditing={true}
+            data-test-id="subtask-form"
+            subtask={selectedSubtask}
+        />
+    ) : (
+        <ValleySubtaskForm
+            onCancel={handleCancelSubtask}
+            onSave={handleCreateSubtask}
+            valley="Valle de Copiapó"
+            data-test-id="subtask-form"
+            subtask={{
+                name: "",
+                number: "",
+                description: "",
+                budget: "",
+                expenses: "",
+                startDate: "",
+                endDate: "",
+                finishDate: "",
+                beneficiary: "",
+                status: "",  
+                priorityId: "",     
+                taskId: expandedRow // ID de la tarea actual
+            }}
+        />
+    )}
+</Modal>
         </div>
     );
 };

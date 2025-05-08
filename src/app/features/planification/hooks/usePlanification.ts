@@ -40,6 +40,11 @@ export const usePlanification = () => {
         setIsPopupOpen(false);
     };
 
+    const handleCancelSubtask = () => {
+        setSelectedSubtask(null);
+        setIsPopupSubtaskOpen(false);
+    };
+
     const handleSaveTask = async (task: any) => {
         try {
             const { data } = await createTask({
@@ -231,11 +236,21 @@ export const usePlanification = () => {
             const { data: subtaskData } = await getSubtask({
                 variables: { id: subtaskId },
             });
-            if (subtaskData) {
-                setSelectedSubtask(subtaskData.subtask);
+            if (subtaskData && subtaskData.subtask) {
+                const subtaskWithDefaults = {
+                    ...subtaskData.subtask,
+                    priorityId: subtaskData.subtask.priorityId || 1,  
+                    number: subtaskData.subtask.number || "",
+                    name: subtaskData.subtask.name || "",
+                    description: subtaskData.subtask.description || "",
+                    budget: subtaskData.subtask.budget || 0,
+                    startDate: subtaskData.subtask.startDate || new Date().toISOString(),
+                    endDate: subtaskData.subtask.endDate || new Date().toISOString(),
+                };
+                setSelectedSubtask(subtaskWithDefaults);
+                console.log("Subtask data with defaults:", subtaskWithDefaults);
                 setIsPopupSubtaskOpen(true);
-                console.log(selectedSubtask);
-                return subtaskData.subtask;
+                return subtaskWithDefaults;
             } else {
                 console.warn("No data found for the given subtask ID:", subtaskId);
                 return null;
@@ -301,6 +316,7 @@ export const usePlanification = () => {
             console.log("Subtask created successfully:", data.createSubtask.id);
             setIsPopupSubtaskOpen(false);
             refetch(); 
+            window.location.reload();
         }
         catch (error) {
             console.error("Error creating subtask:", error);
@@ -308,19 +324,21 @@ export const usePlanification = () => {
     }
 
     const handleUpdateSubtask = async (subtask: any) => {
+        console.log(selectedTaskId);
         try {
             const { data } = await updateSubtask({
                 variables: {
+                    id: selectedSubtask.id,
                     input: {
-                        id: selectedSubtask.id,
                         taskId: selectedTaskId,
                         number: subtask.number,
                         name: subtask.name,
                         description: subtask.description,
                         budget: subtask.budget,
+                        expense: subtask.expenses,
                         startDate: subtask.startDate,
                         endDate: subtask.endDate,
-                        statusId: 1,
+                        statusId: subtask.status,
                         priorityId: subtask.priority,
                     },
                 },
@@ -328,9 +346,9 @@ export const usePlanification = () => {
             if (!data?.updateSubtask?.id) {
                 throw new Error("Subtask update failed: ID is undefined.");
             }
-            console.log("Subtask updated successfully:", data.updateSubtask.id);
+            console.log("Subtask updated successfully:", data.updateSubtask);
             setIsPopupSubtaskOpen(false);
-            refetch(); 
+            window.location.reload();
         }
         catch (error) {
             console.error("Error updating subtask:", error);
@@ -403,6 +421,7 @@ export const usePlanification = () => {
         handleCreateSubtask,
         handleUpdateSubtask,
         handleUpdateTask,
+        handleCancelSubtask,
         isPopupOpen,
         isPopupSubtaskOpen,
         selectedTaskId,

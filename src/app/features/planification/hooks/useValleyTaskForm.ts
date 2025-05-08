@@ -3,6 +3,7 @@ import { HuascoValley, CopiapoValley, ElquiValley } from "@/constants/faenas";
 import { taskOrigin, taskType, taskScope, taskInteraction, taskState, taskRisk, taskInvestment } from "@/constants/infoTasks";
 import { Valleys } from "@/constants/valleys";
 import { usePlanification } from "./usePlanification";
+import { subtaskPriority, subtaskState } from "@/constants/subtask";
 
 export interface InitialValues {
     name?: string;
@@ -103,15 +104,23 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
     const fetchSubtaskInitialValues = async () => {
         if (subtask) {
           try {
+
+            const formatDateForInput = (dateString: string | null | undefined) => {
+                if (!dateString) return "";
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return "";
+                return date.toISOString().split('T')[0]; 
+              };
+
             setSubtasksInitialValues({
               name: subtask.name || "",
               number: subtask.number || "",
               description: subtask.description || "",
               budget: subtask.budget || "",
-              expenses: subtask.expenses || "",
-              startDate: subtask.startDate || "",
-              endDate: subtask.endDate || "",
-              finishDate: subtask.finishDate || "",
+              expenses: subtask.expense || "",
+              startDate: formatDateForInput(subtask.startDate) || "",
+              endDate: formatDateForInput(subtask.endDate) || "",
+              finishDate: formatDateForInput(subtask.finishDate) || "",
               beneficiary: subtask.beneficiary || "",
               state: subtask.statusId || "",
               priority: subtask.priorityId || "",
@@ -224,8 +233,8 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
             number: parseInt(subtaskFormState.number) || 1,
             budget: parseInt(subtaskFormState.budget) || 0,
             expenses: parseInt(subtaskFormState.expenses) || 0,
-            priority: parseInt(subtaskFormState.priority) || 1,
-            status: parseInt(subtaskFormState.state) || 1,
+            priority: Number(subtaskFormState.priority) ? Number(subtaskFormState.priority) : subtaskPriority.findIndex((p) => p === subtaskFormState.priority) + 1,
+            status: Number(subtaskFormState.state) ? Number(subtaskFormState.state) : subtaskState.findIndex((s) => s === subtaskFormState.state) + 1,
         };
         onSave(subtaskDetails);
         setSubtaskFormState({
@@ -274,7 +283,9 @@ export const useValleyTaskForm = (onSave: (task: any) => void, valley:string,  i
         interaction: taskInteraction,
         state: taskState,
         risk : taskRisk,
-        investment: taskInvestment
+        investment: taskInvestment,
+        subtaskState: subtaskState,
+        subtaskPriority: subtaskPriority,
     }), []);
 
     return {
